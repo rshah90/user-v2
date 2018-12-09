@@ -1,0 +1,4 @@
+[0m[[0m[33mwarn[0m] [0m[0m/Users/carlnjoku/scala/client/careercolony/careercolony-akka-http-mongodb-projects/chat-server/src/main/scala/com/mj/chat/mongo/MongoOps.scala:139:13: method bulkInsert in trait GenericCollection is deprecated: Use `insert[T](ordered).many(documents)`[0m
+[0m[[0m[33mwarn[0m] [0m[0m        col.bulkInsert(ordered = false)(docs: _*)[0m
+[0m[[0m[33mwarn[0m] [0m[0m            ^[0m
+[0m[[0m[33mwarn[0m] [0m[0mone warning found[0m
