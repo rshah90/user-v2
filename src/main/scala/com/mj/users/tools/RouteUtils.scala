@@ -1,11 +1,11 @@
-package com.mj.chat.tools
+package com.mj.users.tools
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.model.{HttpRequest, StatusCodes}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server._
 import akka.stream.ActorMaterializer
-import com.mj.chat.restful.Routes._
+import com.mj.users.restful.Routes._
 import org.joda.time.DateTime
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -47,7 +47,7 @@ object RouteUtils {
         }
       })
       Future {
-        val mapPattern = Seq("chat")
+        val mapPattern = Seq("user")
         var isIgnore = false
         mapPattern.foreach(pattern =>
           isIgnore = isIgnore || rawUri.startsWith(s"/$pattern"))

@@ -1,10 +1,10 @@
-package com.mj.chat.mongo
+package com.mj.users.mongo
 
 import java.util.concurrent.Executors
 
-import com.mj.chat.config.Settings
-import com.mj.chat.config.Settings._
-import com.mj.chat.model.{BaseMongoObj, UpdateResult}
+import com.mj.users.config.Settings
+import com.mj.users.config.Settings._
+import com.mj.users.model.{BaseMongoObj, UpdateResult}
 import play.api.libs.iteratee.Enumerator
 import reactivemongo.api._
 import reactivemongo.api.collections.bson.BSONCollection
@@ -101,9 +101,11 @@ object MongoOps {
         BSONDocument,
         T]): Future[(String, String)] = {
     val recordIns = record
+
+    println("record:"+record)
     recordIns._id = BSONObjectID.generate().stringify
     val insertResult = for {
-      col <- futureCollection
+        col <- futureCollection
       wr <- col.insert[T](recordIns)
     } yield {
       var errmsg = ""
@@ -121,69 +123,7 @@ object MongoOps {
     }
   }
 
-  def bulkInsertCollection[T <: BaseMongoObj](
-      futureCollection: Future[BSONCollection],
-      records: List[T])(
-      implicit handler: BSONDocumentReader[T] with BSONDocumentWriter[T] with BSONHandler[
-        BSONDocument,
-        T]) = {
-    val recordsIns = records.map { record =>
-      val recordIns = record
-      recordIns._id = BSONObjectID.generate().stringify
-      recordIns
-    }
-    val bulkResult = for {
-      col <- futureCollection
-      mwr <- {
-        val docs = recordsIns.map(implicitly[col.ImplicitlyDocumentProducer](_))
-        col.bulkInsert(ordered = false)(docs: _*)
-      }
-    } yield {
-      UpdateResult(n = mwr.n, errmsg = mwr.errmsg.getOrElse(""))
-    }
-    bulkResult.recover {
-      case e: Throwable =>
-        ("", s"bulk insert records error: $e")
-    }
-  }
 
-  //find in collection can return multiple records
-  /**
-    * @param futureCollection : Future[BSONCollection], collection to insert
-    * @param selector         : BSONDocument, filter
-    * @param count            = -1: Int, return record count
-    * @param sort             : BSONDocument = document(), sort
-    * @return Future[List[T] ], return the record list
-    */
-  def findCollection[T <: BaseMongoObj](
-      futureCollection: Future[BSONCollection],
-      selector: BSONDocument,
-      count: Int = -1,
-      page: Int = 1,
-      sort: BSONDocument = document())(
-      implicit handler: BSONDocumentReader[T] with BSONDocumentWriter[T] with BSONHandler[
-        BSONDocument,
-        T]): Future[List[T]] = {
-    var queryOpts = QueryOpts()
-    if (count > 0 && page > 0) {
-      queryOpts = QueryOpts(skipN = (page - 1) * count)
-    }
-    val findResult = for {
-      col <- futureCollection
-      rs <- col
-        .find(selector)
-        .options(queryOpts)
-        .sort(sort)
-        .cursor[T]()
-        .collect(count, Cursor.FailOnError[List[T]]())
-    } yield {
-      rs
-    }
-    findResult.recover {
-      case e: Throwable =>
-        List[T]()
-    }
-  }
 
   //find in collection return one record
   /**
@@ -212,25 +152,7 @@ object MongoOps {
     }
   }
 
-  //count in collection
-  /**
-    * @param futureCollection : Future[BSONCollection], collection to count
-    * @param selector         : BSONDocument, filter
-    * @return Future[Int], return record count
-    */
-  def countCollection(futureCollection: Future[BSONCollection],
-                      selector: BSONDocument): Future[Int] = {
-    val countResult: Future[Int] = for {
-      col <- futureCollection
-      rsCount <- col.count(Some(selector))
-    } yield {
-      rsCount
-    }
-    countResult.recover {
-      case e: Throwable =>
-        0
-    }
-  }
+
 
   /**
     * update in collection

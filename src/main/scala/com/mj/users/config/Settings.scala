@@ -1,4 +1,4 @@
-package com.mj.chat.config
+package com.mj.users.config
 
 import com.typesafe.config.{Config, ConfigFactory}
 

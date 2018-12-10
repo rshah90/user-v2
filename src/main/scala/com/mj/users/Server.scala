@@ -1,20 +1,20 @@
-package com.mj.chat
+package com.mj.users
 
 import java.net.InetAddress
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.stream.ActorMaterializer
-import com.mj.chat.config.Settings
-import com.mj.chat.config.Settings._
-import com.mj.chat.tools.CommonUtils._
-import com.mj.chat.tools.RouteUtils
+import com.mj.users.config.Settings
+import com.mj.users.config.Settings._
+import com.mj.users.tools.CommonUtils._
+import com.mj.users.tools.RouteUtils
 import com.typesafe.config.ConfigFactory
 
 object Server extends App {
   val seedNodesStr = seedNodes
     .split(",")
-    .map(s => s""" "akka.tcp://chat-cluster@$s" """)
+    .map(s => s""" "akka.tcp://users-cluster@$s" """)
     .mkString(",")
 
   val inetAddress = InetAddress.getLocalHost
@@ -27,7 +27,7 @@ object Server extends App {
     .withFallback(
       ConfigFactory.parseString(s"akka.remote.netty.tcp.port=$akkaPort"))
 
-  implicit val system: ActorSystem = ActorSystem("chat-cluster", configCluster)
+  implicit val system: ActorSystem = ActorSystem("users-cluster", configCluster)
   implicit val materializer: ActorMaterializer = ActorMaterializer()
 
   import system.dispatcher
@@ -35,5 +35,5 @@ object Server extends App {
   Http().bindAndHandle(RouteUtils.logRoute, "0.0.0.0", port)
 
   consoleLog("INFO",
-             s"Chat server started! Access url: https://$hostName:$port/")
+             s"User server started! Access url: https://$hostName:$port/")
 }
