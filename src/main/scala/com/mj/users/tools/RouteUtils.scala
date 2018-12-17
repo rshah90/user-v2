@@ -5,12 +5,16 @@ import akka.http.scaladsl.model.{HttpRequest, StatusCodes}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server._
 import akka.stream.ActorMaterializer
-import com.mj.users.restful.Routes._
+import com.mj.users.route._
 import org.joda.time.DateTime
 
 import scala.concurrent.{ExecutionContext, Future}
 
-object RouteUtils {
+object RouteUtils extends RegisterRoute with LoginRoute with LogoutRoute with SignupStepsRoute with UpdateInterestRoute with UpdateInfoRoute {
+
+/*  createUsersCollection()
+  createOnlinesCollection()*/
+
   def badRequest(request: HttpRequest): StandardRoute = {
     val method = request.method.value.toLowerCase
     val path = request.getUri().path()
@@ -67,6 +71,14 @@ object RouteUtils {
       extractRequest { request =>
         badRequest(request)
       }
+  }
+
+
+  def routeLogic(implicit ec: ExecutionContext,
+                 system: ActorSystem,
+                 materializer: ActorMaterializer) = {
+     routeLogin(system) ~ routeLogout(system) ~ routeRegister(system) ~
+       signupStepsRoute(system) ~ updateInterestRoute(system) ~ updateInfoRoute(system)
   }
 
   def logRoute(implicit ec: ExecutionContext,

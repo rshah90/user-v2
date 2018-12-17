@@ -1,10 +1,12 @@
 package com.mj.users.tools
 
 import java.security.MessageDigest
-import java.text.SimpleDateFormat
+import java.util.concurrent.TimeUnit
 
+import authentikat.jwt.{JsonWebToken, JwtClaimsSet, JwtHeader}
 import org.joda.time.DateTime
-import play.api.libs.json.{JsArray, JsNumber, JsString, JsValue}
+import reactivemongo.bson.Macros.Annotations.Key
+
 
 object CommonUtils {
 
@@ -29,6 +31,21 @@ object CommonUtils {
     """(?=[^\s]+)(?=(\w+)@([\w\.]+))""".r.findFirstIn(email).isDefined
   }
 
+  def setClaims(keyToken: String, expiryPeriodInDays: Long) = JwtClaimsSet(
+    Map("iss" -> keyToken/*,
+      "expiredAt" -> (System.currentTimeMillis() + TimeUnit.DAYS
+        .toMillis(expiryPeriodInDays))*/)
+  )
+
+
+  def createToken(headerToken: String , payload : String , secret : String): String = {
+    println("headerToken:"+headerToken)
+    println("payload:"+payload)
+    println("secret:"+secret)
+    val header =  JwtHeader(headerToken)
+    val claimsSet = setClaims(payload , 1)
+    JsonWebToken(header, claimsSet, secret)
+  }
 
 
 
