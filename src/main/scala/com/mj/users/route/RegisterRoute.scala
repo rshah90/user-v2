@@ -4,14 +4,17 @@ import java.util.concurrent.TimeUnit
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.model.StatusCodes.BadRequest
+import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.model.{HttpEntity, HttpResponse, MediaTypes}
 import akka.http.scaladsl.server.Directives.{as, complete, entity, path, post, _}
 import akka.http.scaladsl.server.Route
 import akka.pattern.ask
 import akka.util.Timeout
 import com.mj.users.model.JsonRepo._
-import com.mj.users.model.{Consumer, RegisterDto, RegisterDtoResponse, responseMessage}
-import com.mj.users.tools.SchedulingValidator
+import com.mj.users.model._
+import com.mj.users.tools.{CommonUtils, SchedulingValidator}
+import org.json4s.DefaultFormats
+import org.json4s.native.JsonMethods.parse
 import org.slf4j.LoggerFactory
 import spray.json._
 
@@ -27,6 +30,8 @@ trait RegisterRoute {
     val registerUserProcessor = system.actorSelection("/*/registerProcessor")
     implicit val timeout = Timeout(20, TimeUnit.SECONDS)
     val kongoConsumerDispatcher = system.actorSelection("/*/kongoConsumerDispatcher")
+    val jwtCredentialsDispatcher = system.actorSelection("/*/JWTCredentialsDispatcher")
+
     path("api" / "registerUser") {
       post {
         entity(as[RegisterDto]) { dto =>
@@ -42,7 +47,19 @@ trait RegisterRoute {
                       val consumerCreation = (kongoConsumerDispatcher ? Consumer(dto.email)).mapTo[scalaj.http.HttpResponse[String]]
                       onComplete(consumerCreation) {
                         case Success(res) => {
-                          complete(HttpResponse(entity = HttpEntity(MediaTypes.`application/json`, s.toJson.toString)))
+                          val credentials = (jwtCredentialsDispatcher ? dto.email).mapTo[scalaj.http.HttpResponse[String]]
+                          implicit val formats = DefaultFormats
+                          onComplete(credentials) {
+                            case Success(res) => {
+                              val parsedResp: TokenDetails = parse(res.body.toString).extract[TokenDetails]
+                              val token = CommonUtils.createToken("HS256", parsedResp.key, parsedResp.secret)
+                              respondWithHeader(RawHeader("token", token)) {
+                                complete(HttpResponse(entity = HttpEntity(MediaTypes.`application/json`, s.toJson.toString)))
+
+                              }
+                            }
+                            case Failure(error) => complete(HttpResponse(status = BadRequest, entity = HttpEntity(MediaTypes.`application/json`, responseMessage("", error.getMessage, "").toJson.toString)))
+                          }
                         }
                         case Failure(error) => complete(HttpResponse(status = BadRequest, entity = HttpEntity(MediaTypes.`application/json`, responseMessage("", error.getMessage, "").toJson.toString)))
                       }
