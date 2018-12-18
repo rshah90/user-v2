@@ -7,12 +7,15 @@ import akka.util.Timeout
 import spray.json._
 import scalaj.http.{Http, HttpResponse}
 import com.mj.users.config.Application._
+import com.mj.users.model.responseMessage
+
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.util.{Failure, Try}
 /*
  *  Created by neluma001c on 8/7/2018
  */
 
-class JWTCredentialsDispatcher extends Actor  with DiagnosticActorLogging {
+class JWTCredentialsCreation extends Actor  with DiagnosticActorLogging {
 
   def receive = {
     case consumerName : String =>
@@ -20,10 +23,16 @@ class JWTCredentialsDispatcher extends Actor  with DiagnosticActorLogging {
       implicit val timeout = Timeout(20, TimeUnit.SECONDS)
       println("consumerName:"+consumerName)
 
-      val response = Http(kongAdminURL +"consumers/" + consumerName + "/jwt").header("Content-Type", "application/json").postData("{}").asString
+      val result = Try{Http(kongAdminURL +"consumers/" + consumerName + "/jwt").header("Content-Type", "application/json").postData("{}").asString}.map(
+          response => origin ! response
+        )
       /*val response = " {\n            \"created_at\": 1545067504069,\n            \"id\": \"253c64c4-9133-4bac-bdb5-08e6fa2b2d40\",\n            \"algorithm\": \"HS256\",\n            \"secret\": \"S8vpUIGMA7RVpjsnWZPVP1Vj8wwrd30p\",\n            \"key\": \"SDZ0YQzA0wrLzJRmifZOgFY1atV0c8FV\",\n            \"consumer_id\": \"b14aee55-cedc-44db-97b7-4c682d4f8795\"\n        }"
       origin ! HttpResponse(response, 200, Map.empty)*/
-      println("response:"+response)
-      origin ! response
+      /*println("response:"+response)*/
+
+      result.recover {
+        case e: Throwable =>
+          origin !  HttpResponse(e.getMessage, 400, Map.empty)
+      }
   }
 }

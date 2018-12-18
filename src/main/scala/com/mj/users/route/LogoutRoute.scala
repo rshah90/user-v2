@@ -10,15 +10,15 @@ import akka.http.scaladsl.server.Route
 import akka.pattern.ask
 import akka.util.Timeout
 import com.mj.users.model.JsonRepo._
-import com.mj.users.model.{LoginDto, UidDto, responseMessage}
-import com.mj.users.tools.SchedulingValidator
+import com.mj.users.model.{UidDto, responseMessage}
+import org.json4s.DefaultFormats
 import org.slf4j.LoggerFactory
 import spray.json._
 
 import scala.util.{Failure, Success}
 
 
-trait LogoutRoute  {
+trait LogoutRoute {
   val logoutUserLog = LoggerFactory.getLogger(this.getClass.getName)
 
 
@@ -26,17 +26,31 @@ trait LogoutRoute  {
 
     val logoutUserProcessor = system.actorSelection("/*/logoutProcessor")
     implicit val timeout = Timeout(20, TimeUnit.SECONDS)
+    val JWTConsumerRemoval = system.actorSelection("/*/JWTConsumerRemoval")
 
     path("api" / "logoutUser") {
       post {
         entity(as[UidDto]) { dto =>
+          headerValueByName("X-Consumer-Id") {
+            consumerId =>
+
               val logoutResponse = logoutUserProcessor ? dto
               onComplete(logoutResponse) {
                 case Success(resp) =>
                   resp match {
-                    case s: responseMessage  => if (s.successmsg.nonEmpty)
-                      complete(HttpResponse(entity = HttpEntity(MediaTypes.`application/json`, s.toJson.toString)))
-                    else
+                    case s: responseMessage => if (s.successmsg.nonEmpty) {
+
+                      val msg = (JWTConsumerRemoval ? (dto.email, consumerId)).mapTo[scalaj.http.HttpResponse[String]]
+                      implicit val formats = DefaultFormats
+                      onComplete(msg) {
+                        case Success(res) => res.code match {
+                          case 204 => complete(HttpResponse(entity = HttpEntity(MediaTypes.`application/json`, s.toJson.toString)))
+                          case _ =>
+                            complete(HttpResponse(status = BadRequest, entity = HttpEntity(MediaTypes.`application/json`, responseMessage("", res.body.toString, "").toJson.toString)))
+                        }
+                        case Failure(error) => complete(HttpResponse(status = BadRequest, entity = HttpEntity(MediaTypes.`application/json`, responseMessage("", error.getMessage, "").toJson.toString)))
+                      }
+                    } else
                       complete(HttpResponse(status = BadRequest, entity = HttpEntity(MediaTypes.`application/json`, s.toJson.toString)))
                     case _ => complete(HttpResponse(status = BadRequest, entity = HttpEntity(MediaTypes.`application/json`, responseMessage("", resp.toString, "").toJson.toString)))
                   }
@@ -45,6 +59,8 @@ trait LogoutRoute  {
                   complete(HttpResponse(status = BadRequest, entity = HttpEntity(MediaTypes.`application/json`, responseMessage("", error.getMessage, "").toJson.toString)))
               }
 
+
+          }
         }
       }
     }

@@ -13,10 +13,10 @@ import akka.util.Timeout
 import com.mj.users.model.JsonRepo._
 import com.mj.users.model.{LoginDto, TokenDetails, responseMessage}
 import com.mj.users.tools.{CommonUtils, SchedulingValidator}
-import org.slf4j.LoggerFactory
-import spray.json._
 import org.json4s.DefaultFormats
 import org.json4s.native.JsonMethods._
+import org.slf4j.LoggerFactory
+import spray.json._
 
 import scala.util.{Failure, Success}
 
@@ -27,7 +27,7 @@ trait LoginRoute {
   def routeLogin(system: ActorSystem): Route = {
 
     val loginUserProcessor = system.actorSelection("/*/loginProcessor")
-    val jwtCredentialsDispatcher = system.actorSelection("/*/JWTCredentialsDispatcher")
+    val JWTCredentialsCreation = system.actorSelection("/*/JWTCredentialsCreation")
     implicit val timeout = Timeout(20, TimeUnit.SECONDS)
 
     path("api" / "loginUser") {
@@ -42,15 +42,21 @@ trait LoginRoute {
                 case Success(resp) =>
                   resp match {
                     case s: responseMessage => if (s.successmsg.nonEmpty) {
-                       val credentials = (jwtCredentialsDispatcher ? dto.email).mapTo[scalaj.http.HttpResponse[String]]
+                      val credentials = (JWTCredentialsCreation ? dto.email).mapTo[scalaj.http.HttpResponse[String]]
                       implicit val formats = DefaultFormats
                       onComplete(credentials) {
                         case Success(res) => {
-                          val parsedResp: TokenDetails = parse(res.body.toString).extract[TokenDetails]
-                          val token = CommonUtils.createToken("HS256", parsedResp.key, parsedResp.secret)
-                          respondWithHeader(RawHeader("token", token)) {
-                            complete(HttpResponse(entity = HttpEntity(MediaTypes.`application/json`, s.toJson.toString)))
+                          res.code match {
+                            case 201 => {
+                              val parsedResp: TokenDetails = parse(res.body.toString).extract[TokenDetails]
+                              val token = CommonUtils.createToken("HS256", parsedResp.key, parsedResp.secret)
+                              respondWithHeader(RawHeader("token", token)) {
+                                complete(HttpResponse(entity = HttpEntity(MediaTypes.`application/json`, s.toJson.toString)))
+                              }
 
+                            }
+                            case 400 =>
+                              complete(HttpResponse(status = BadRequest, entity = HttpEntity(MediaTypes.`application/json`, responseMessage("", res.body, "").toJson.toString)))
                           }
                         }
                         case Failure(error) => complete(HttpResponse(status = BadRequest, entity = HttpEntity(MediaTypes.`application/json`, responseMessage("", error.getMessage, "").toJson.toString)))

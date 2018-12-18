@@ -9,7 +9,7 @@ import spray.json.{DefaultJsonProtocol, RootJsonFormat}
 case class LoginDto(email: String, password: String)
 
 //logout api user request
-case class UidDto(uid: String)
+case class UidDto(uid: String , email : String)
 
 //RegisterDto api user request
 case class RegisterDto(email: String, nickname: String, password: String, repassword: String, gender: Int, firstname: String, lastname: String, contact_info: Option[ContactInfo], location:Option[Location], connections: Option[List[String]], connection_requests: Option[List[String]], friends_with_post:Option[List[String]])
@@ -59,8 +59,11 @@ case class Interest(memberID: String, interest: Option[String])
 case class PersonalInfo(memberID: String, contact_info : ContactInfo)
 
 
-case class TokenDetails(consumer_id : String , created_at : Long , id : String , key : String , secret : String)
+case class TokenDetails(consumer_id : String , created_at : Long , id : String , key : String , secret : String ,algorithm : Option[String])
 
+case class ConsumerDetails(userName : String , created_at : Long , id : String )
+
+case class listConsumerDetails(total : Long , data : List[TokenDetails])
 
 case class Consumer(username : String)
 /*case class GetJobTitle(position: String)
@@ -69,7 +72,7 @@ case class GetCompanies(employer: String)*/
 
 object JsonRepo extends DefaultJsonProtocol with SprayJsonSupport {
   implicit val loginDtoFormats: RootJsonFormat[LoginDto] = jsonFormat2(LoginDto)
-  implicit val uidDtoFormats: RootJsonFormat[UidDto] = jsonFormat1(UidDto)
+  implicit val uidDtoFormats: RootJsonFormat[UidDto] = jsonFormat2(UidDto)
   implicit val locationFormats: RootJsonFormat[Location] = jsonFormat11(Location)
   implicit val contactInfoFormats: RootJsonFormat[ContactInfo] = jsonFormat11(ContactInfo)
   implicit val registerDtoFormats: RootJsonFormat[RegisterDto] = jsonFormat12(RegisterDto)
@@ -78,7 +81,9 @@ object JsonRepo extends DefaultJsonProtocol with SprayJsonSupport {
   implicit val secondSignupStepsFormats: RootJsonFormat[SecondSignupStep] = jsonFormat12(SecondSignupStep)
   implicit val interestFormats: RootJsonFormat[Interest] = jsonFormat2(Interest)
   implicit val personalInfoFormats: RootJsonFormat[PersonalInfo] = jsonFormat2(PersonalInfo)
-  implicit val tokenDetailsFormats: RootJsonFormat[TokenDetails] = jsonFormat5(TokenDetails)
+  implicit val tokenDetailsFormats: RootJsonFormat[TokenDetails] = jsonFormat6(TokenDetails)
   implicit val consumerFormats: RootJsonFormat[Consumer] = jsonFormat1(Consumer)
+  implicit val consumerDetailsFormats: RootJsonFormat[ConsumerDetails] = jsonFormat3(ConsumerDetails)
+  implicit val consumerDetailsListFormats: RootJsonFormat[listConsumerDetails] = jsonFormat2(listConsumerDetails)
 
 }

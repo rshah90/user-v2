@@ -38,8 +38,9 @@ object Server extends App {
   val sigupStepsProcessor = system.actorOf(RoundRobinPool(20).props(Props[processor.SignupStepsProcessor]), "signupStepsProcessor")
   val updateInterestProcessor = system.actorOf(RoundRobinPool(20).props(Props[processor.UpdateInterestProcessor]), "updateInterestProcessor")
   val updateInfoProcessor = system.actorOf(RoundRobinPool(20).props(Props[processor.UpdateInfoProcessor]), "updateInfoProcessor")
-  val jwtCredentialsDispatcher = system.actorOf(RoundRobinPool(20).props(Props[dispatcher.JWTCredentialsDispatcher]), "JWTCredentialsDispatcher")
-  val kongoConsumerDispatcher = system.actorOf(RoundRobinPool(20).props(Props[dispatcher.KongoConsumerDispatcher]), "kongoConsumerDispatcher")
+  val JWTCredentialsCreation = system.actorOf(RoundRobinPool(20).props(Props[dispatcher.JWTCredentialsCreation]), "JWTCredentialsCreation")
+  val JWTConsumerCreation = system.actorOf(RoundRobinPool(20).props(Props[dispatcher.JWTConsumerCreation]), "JWTConsumerCreation")
+  val JWTConsumerRemoval = system.actorOf(RoundRobinPool(20).props(Props[dispatcher.JWTConsumerRemoval]), "JWTConsumerRemoval")
 
 
   import system.dispatcher
