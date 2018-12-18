@@ -1,8 +1,9 @@
 package com.mj.users.tools
 
 import java.security.MessageDigest
+import java.util.Calendar
 import java.util.concurrent.TimeUnit
-
+import java.time.{Instant, ZoneId, ZonedDateTime}
 import authentikat.jwt.{JsonWebToken, JwtClaimsSet, JwtHeader}
 import org.joda.time.DateTime
 import reactivemongo.bson.Macros.Annotations.Key
@@ -31,12 +32,17 @@ object CommonUtils {
     """(?=[^\s]+)(?=(\w+)@([\w\.]+))""".r.findFirstIn(email).isDefined
   }
 
-  def setClaims(keyToken: String, expiryPeriodInDays: Long) = JwtClaimsSet(
-    Map("iss" -> keyToken/*,
-      "expiredAt" -> (System.currentTimeMillis() + TimeUnit.DAYS
-        .toMillis(expiryPeriodInDays))*/)
-  )
-
+  def setClaims(keyToken: String, expiryPeriodInDays: Long) =
+{
+  val startDate =Calendar.getInstance()
+  val now = Calendar.getInstance()
+  now.add(Calendar.MINUTE, 10)
+    JwtClaimsSet(
+      Map("iss" -> keyToken,
+        "iat" -> TimeUnit.MILLISECONDS.toSeconds(startDate.getTimeInMillis),
+        "exp" -> TimeUnit.MILLISECONDS.toSeconds(now.getTimeInMillis)
+      ))
+  }
 
   def createToken(headerToken: String , payload : String , secret : String): String = {
     println("headerToken:"+headerToken)
