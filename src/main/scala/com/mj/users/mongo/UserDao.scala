@@ -86,7 +86,8 @@ object UserDao {
       ))
     } else {
        BSONDocument("$set" -> BSONDocument("experience" -> userExperience(secondStepRequest.current,
-        secondStepRequest.position,secondStepRequest.industry,secondStepRequest.employer, secondStepRequest.updated_date),
+        secondStepRequest.position,secondStepRequest.industry,secondStepRequest.employer, secondStepRequest.updated_date,secondStepRequest.start_day
+       ,secondStepRequest.start_month,secondStepRequest.start_year,secondStepRequest.end_day,secondStepRequest.end_month,secondStepRequest.end_year),
         "interest_on_colony" -> secondStepRequest.interest_on_colony,
         "country" -> secondStepRequest.country,
         "userIP" -> secondStepRequest.userIP,
@@ -124,7 +125,9 @@ object UserDao {
           secondStepRequest.position,
           secondStepRequest.industry,
           secondStepRequest.employer,
-          secondStepRequest.updated_date
+          secondStepRequest.updated_date,
+          secondStepRequest.start_day
+          ,secondStepRequest.start_month,secondStepRequest.start_year,secondStepRequest.end_day,secondStepRequest.end_month,secondStepRequest.end_year
         )
       }.flatMap(expirenceData => insert[Experience](experienceCollection, expirenceData).map(response => response))
     }

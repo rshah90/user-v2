@@ -32,12 +32,12 @@ case class Location(city: Option[String], state:Option[String], country: Option[
 case class ContactInfo(address: String, city: String, state: String, country: String, email:Option[String], mobile_phone: Option[String], birth_day:Option[Int], birth_month:Option[Int], birth_year:Option[Int], twitter_profile:Option[String], facebook_profile:Option[String])
 
 //SecondSignupStep api user response
-case class SecondSignupStep(memberID: String, country:String, employmentStatus:String, employer:Option[String], position:Option[String], industry:Option[String], degree:Option[String], school_name:Option[String], current: Boolean , interest_on_colony: Option[String], userIP: Option[String], updated_date: Option[String])
+case class SecondSignupStep(memberID: String, country:String, employmentStatus:String, employer:Option[String], position:Option[String], industry:Option[String], degree:Option[String], school_name:Option[String], current: Boolean , interest_on_colony: Option[String], userIP: Option[String], updated_date: Option[String] ,start_day:Option[Int], start_month:Option[Int], start_year:Option[Int],end_day:Option[Int], end_month:Option[Int], end_year:Option[Int])
 
 //Experience Collection
-case class Experience (expID : String , memberID : String , current :  Boolean , position : Option[String] , industry :  Option[String] , employer :  Option[String] , updated_date :  Option[String])
+case class Experience (expID : String , memberID : String , current :  Boolean , position : Option[String] , industry :  Option[String] , employer :  Option[String] , updated_date :  Option[String],start_day:Option[Int], start_month:Option[Int], start_year:Option[Int],end_day:Option[Int], end_month:Option[Int], end_year:Option[Int])
 
-case class userExperience(current :  Boolean , position : Option[String] , industry : Option[String] , employer : Option[String] , updated_date : Option[String] )
+case class userExperience(current :  Boolean , position : Option[String] , industry : Option[String] , employer : Option[String] , updated_date : Option[String] ,start_day:Option[Int], start_month:Option[Int], start_year:Option[Int],end_day:Option[Int], end_month:Option[Int], end_year:Option[Int])
 
 //Education Collection
 case class Education(eduID: String, memberID: String, school_name:  Option[String], degree:  Option[String], updated_date:  Option[String])
@@ -78,7 +78,7 @@ object JsonRepo extends DefaultJsonProtocol with SprayJsonSupport {
   implicit val registerDtoFormats: RootJsonFormat[RegisterDto] = jsonFormat12(RegisterDto)
   implicit val errorMessageDtoFormats: RootJsonFormat[responseMessage] = jsonFormat3(responseMessage)
   implicit val registerDtoResponseDtoFormats: RootJsonFormat[RegisterDtoResponse] = jsonFormat4(RegisterDtoResponse)
-  implicit val secondSignupStepsFormats: RootJsonFormat[SecondSignupStep] = jsonFormat12(SecondSignupStep)
+  implicit val secondSignupStepsFormats: RootJsonFormat[SecondSignupStep] = jsonFormat18(SecondSignupStep)
   implicit val interestFormats: RootJsonFormat[Interest] = jsonFormat2(Interest)
   implicit val personalInfoFormats: RootJsonFormat[PersonalInfo] = jsonFormat2(PersonalInfo)
   implicit val tokenDetailsFormats: RootJsonFormat[TokenDetails] = jsonFormat6(TokenDetails)
