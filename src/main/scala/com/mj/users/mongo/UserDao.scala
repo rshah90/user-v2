@@ -69,6 +69,11 @@ object UserDao {
       document("registerDto.email" -> userRequest.email))
   }
 
+  def getUserDetailsById(id: String): Future[Option[DBRegisterDto]] = {
+    search[DBRegisterDto](usersCollection,
+      document("_id" -> id))
+  }
+
   def updateUserDetails(secondStepRequest: SecondSignupStep): Future[String] = {
     val selector: BSONDocument = if (secondStepRequest.employmentStatus.toInt > 5) {
       BSONDocument("$set" -> BSONDocument("education" -> userEducation(secondStepRequest.school_name,

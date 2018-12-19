@@ -40,7 +40,7 @@ trait LogoutRoute {
                   resp match {
                     case s: responseMessage => if (s.successmsg.nonEmpty) {
 
-                      val msg = (JWTConsumerRemoval ? (dto.email, consumerId)).mapTo[scalaj.http.HttpResponse[String]]
+                      val msg = (JWTConsumerRemoval ? (dto.uid, consumerId)).mapTo[scalaj.http.HttpResponse[String]]
                       implicit val formats = DefaultFormats
                       onComplete(msg) {
                         case Success(res) => res.code match {

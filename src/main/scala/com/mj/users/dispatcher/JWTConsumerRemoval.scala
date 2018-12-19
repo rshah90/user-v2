@@ -11,8 +11,11 @@ import com.mj.users.model._
 import com.mj.users.tools.{CommonUtils, SchedulingValidator}
 import org.json4s.DefaultFormats
 import org.json4s.native.JsonMethods._
+import com.mj.users.mongo.UserDao.getUserDetailsById
 
 import scala.util.{Failure, Try}
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 /*
  *  Created by neluma001c on 8/7/2018
  */
@@ -20,16 +23,19 @@ import scala.util.{Failure, Try}
 class JWTConsumerRemoval extends Actor  with DiagnosticActorLogging {
 
   def receive = {
-    case (consumerName : String , consumerId : String) =>
+    case (uid : String , consumerId : String) =>
       val origin = sender()
       implicit val timeout = Timeout(20, TimeUnit.SECONDS)
-      println("consumerName:"+consumerName)
+
+      val userDetails = for{userDbDetails <- getUserDetailsById(uid)}yield(userDbDetails)
+
       implicit val formats = DefaultFormats
       val result = for{
-        response <- Try{Http(kongAdminURL +"consumers/" + consumerName + "/jwt").header("Content-Type", "application/json").asString}
-        parsedResp <- Try{parse(response.body.toString).extract[listConsumerDetails]}
-        id <- Try{parsedResp.data.filter(details => details.consumer_id == consumerId).head.id}
-        resp <- Try{Http(kongAdminURL +"consumers/" + consumerName + "/jwt/" + id).method("DELETE").header("Content-Type", "application/json").asString}
+        user <- userDetails
+        response <- Future{Http(kongAdminURL +"consumers/" + user.get.registerDto.email + "/jwt").header("Content-Type", "application/json").asString}
+        parsedResp <- Future{parse(response.body.toString).extract[listConsumerDetails]}
+        id <- Future{parsedResp.data.filter(details => details.consumer_id == consumerId).head.id}
+        resp <- Future{Http(kongAdminURL +"consumers/" + user.get.registerDto.email + "/jwt/" + id).method("DELETE").header("Content-Type", "application/json").asString}
         _ = origin ! resp
       } yield()
 

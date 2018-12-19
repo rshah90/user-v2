@@ -9,7 +9,7 @@ import spray.json.{DefaultJsonProtocol, RootJsonFormat}
 case class LoginDto(email: String, password: String)
 
 //logout api user request
-case class UidDto(uid: String , email : String)
+case class UidDto(uid: String)
 
 //RegisterDto api user request
 case class RegisterDto(email: String, nickname: String, password: String, repassword: String, gender: Int, firstname: String, lastname: String, contact_info: Option[ContactInfo], location:Option[Location], connections: Option[List[String]], connection_requests: Option[List[String]], friends_with_post:Option[List[String]])
@@ -72,7 +72,7 @@ case class GetCompanies(employer: String)*/
 
 object JsonRepo extends DefaultJsonProtocol with SprayJsonSupport {
   implicit val loginDtoFormats: RootJsonFormat[LoginDto] = jsonFormat2(LoginDto)
-  implicit val uidDtoFormats: RootJsonFormat[UidDto] = jsonFormat2(UidDto)
+  implicit val uidDtoFormats: RootJsonFormat[UidDto] = jsonFormat1(UidDto)
   implicit val locationFormats: RootJsonFormat[Location] = jsonFormat11(Location)
   implicit val contactInfoFormats: RootJsonFormat[ContactInfo] = jsonFormat11(ContactInfo)
   implicit val registerDtoFormats: RootJsonFormat[RegisterDto] = jsonFormat12(RegisterDto)
