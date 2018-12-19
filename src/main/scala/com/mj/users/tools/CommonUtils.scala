@@ -7,7 +7,7 @@ import java.time.{Instant, ZoneId, ZonedDateTime}
 import authentikat.jwt.{JsonWebToken, JwtClaimsSet, JwtHeader}
 import org.joda.time.DateTime
 import reactivemongo.bson.Macros.Annotations.Key
-
+import com.mj.users.config.Application.kongExpirationTime
 
 object CommonUtils {
 
@@ -36,7 +36,7 @@ object CommonUtils {
 {
   val startDate =Calendar.getInstance()
   val now = Calendar.getInstance()
-  now.add(Calendar.MINUTE, 10)
+  now.add(Calendar.MINUTE, kongExpirationTime)
     JwtClaimsSet(
       Map("iss" -> keyToken,
         "iat" -> TimeUnit.MILLISECONDS.toSeconds(startDate.getTimeInMillis),

@@ -21,6 +21,7 @@ object Application {
   val configProfileDbName: String = configMongo.getString("configProfileDbName")
 
   val kongAdminURL = config.getString("kong.admin.url")
+  val kongExpirationTime = config.getInt("kong.expiration.time")
 
   //Mongo configuration
   val dbName = configMongoDbname
