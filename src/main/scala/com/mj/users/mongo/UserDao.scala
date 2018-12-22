@@ -72,12 +72,14 @@ object UserDao {
   def getUserDetailsById(id: String): Future[Option[DBRegisterDto]] = {
     search[DBRegisterDto](usersCollection,
       document("_id" -> id))
+
   }
 
-  def updateUserDetails(secondStepRequest: SecondSignupStep): Future[String] = {
+
+    def updateUserDetails(secondStepRequest: SecondSignupStep): Future[String] = {
     val selector: BSONDocument = if (secondStepRequest.employmentStatus.toInt > 5) {
       BSONDocument("$set" -> BSONDocument("education" -> userEducation(secondStepRequest.school_name,
-        secondStepRequest.degree, secondStepRequest.updated_date),
+        secondStepRequest.field_of_study, secondStepRequest.degree,secondStepRequest.start_year, secondStepRequest.end_year,secondStepRequest.activities),
         "interest_on_colony" -> secondStepRequest.interest_on_colony,
         "country" -> secondStepRequest.country,
         "userIP" -> secondStepRequest.userIP,
@@ -85,9 +87,9 @@ object UserDao {
         "secondSignup_flag" -> true
       ))
     } else {
-       BSONDocument("$set" -> BSONDocument("experience" -> userExperience(secondStepRequest.current,
-        secondStepRequest.position,secondStepRequest.industry,secondStepRequest.employer, secondStepRequest.updated_date,secondStepRequest.start_day
-       ,secondStepRequest.start_month,secondStepRequest.start_year,secondStepRequest.end_day,secondStepRequest.end_month,secondStepRequest.end_year),
+       BSONDocument("$set" -> BSONDocument("experience" -> userExperience(secondStepRequest.position,secondStepRequest.career_level,
+         secondStepRequest.description,secondStepRequest.employer,secondStepRequest.start_month,secondStepRequest.start_year,
+         secondStepRequest.end_month,secondStepRequest.end_year,Some(secondStepRequest.current),secondStepRequest.industry),
         "interest_on_colony" -> secondStepRequest.interest_on_colony,
         "country" -> secondStepRequest.country,
         "userIP" -> secondStepRequest.userIP,
@@ -111,8 +113,13 @@ object UserDao {
           BSONObjectID.generate().stringify,
           secondStepRequest.memberID,
           secondStepRequest.school_name,
+          secondStepRequest.field_of_study,
           secondStepRequest.degree,
-          secondStepRequest.updated_date
+          secondStepRequest.start_year,
+          secondStepRequest.end_year,
+          secondStepRequest.activities,
+          None,
+          None
         )
       }.flatMap(eductionData => insert[Education](eductionCollection, eductionData).map(response => response))
 
@@ -121,17 +128,18 @@ object UserDao {
         Experience(
           BSONObjectID.generate().stringify,
           secondStepRequest.memberID,
-          secondStepRequest.current,
           secondStepRequest.position,
-          secondStepRequest.industry,
+          secondStepRequest.career_level,
+          secondStepRequest.description,
           secondStepRequest.employer,
-          secondStepRequest.updated_date,
-          secondStepRequest.start_day
-          ,secondStepRequest.start_month,secondStepRequest.start_year,secondStepRequest.end_day,secondStepRequest.end_month,secondStepRequest.end_year
+          secondStepRequest.start_month,
+          secondStepRequest.start_year
+          ,secondStepRequest.end_month,secondStepRequest.end_year,None , None ,Some(secondStepRequest.current),secondStepRequest.industry
         )
       }.flatMap(expirenceData => insert[Experience](experienceCollection, expirenceData).map(response => response))
     }
   }
+
 
   def updateUserInterestDetails(interestReq: Interest): Future[String] = {
 
