@@ -30,7 +30,7 @@ class LoginProcessor extends Actor with MessageConfig{
       val result = search[DBRegisterDto](usersCollection, document("registerDto.email" -> loginDto.email))
         .flatMap(user => Future {
           user.filter(_.registerDto.password == sha1(loginDto.password)).map(_._id).map(uid => {
-            loginUpdate(uid)
+            loginUpdate(uid,loginDto)
             uid
           })
         }).flatMap(uid =>

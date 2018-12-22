@@ -6,13 +6,18 @@ import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import spray.json.{DefaultJsonProtocol, RootJsonFormat}
 
 //login api user request
-case class LoginDto(email: String, password: String)
+case class LoginDto(email: String, password: String ,  user_agent : Option[String], location: Option[Location])
 
 //logout api user request
 case class UidDto(uid: String)
 
 //RegisterDto api user request
-case class RegisterDto(email: String, nickname: String, password: String, repassword: String, gender: Int, firstname: String, lastname: String, contact_info: Option[ContactInfo], location:Option[Location], connections: Option[List[String]], connection_requests: Option[List[String]], friends_with_post:Option[List[String]])
+case class RegisterDto(email: String, nickname: String, password: String, repassword: String,
+                       gender: Int, firstname: String, lastname: String, contact_info: Option[ContactInfo],
+                       location:Option[Location], connections: Option[List[String]],
+                       connection_requests: Option[List[String]],
+                       friends_with_post:Option[List[String]],
+                       user_agent : Option[String])
 
 //RegisterDto api user response
 case class RegisterDtoResponse(memberID: String, firstname: String, lastname: String, email: String)
@@ -23,9 +28,10 @@ case class DBRegisterDto(var _id : String , avatar: String,
                          experience : Option[userExperience] , /*experience collection*/
                          education: Option[userEducation] , /*education collection*/
                          Interest : Option[List[String]] ,   /*interest details*/
-                         userIP : Option[String] ,country : Option[String] ,interest_on_colony : Option[String] , employmentStatus : Option[String] , /*extra fields from second step page*/
-                         interest_flag: Option[Boolean]= Some(false), secondSignup_flag : Option[Boolean]= Some(false), email_verification_flag : Option[Boolean]= Some(false), /*user prfile flags*/
-                         lastLogin: Long = 0, loginCount: Int = 0, sessionsStatus: List[SessionStatus] = List(), dateline: Long = System.currentTimeMillis()) /*default value*/
+                         userIP : Option[String] ,country : Option[String] ,interest_on_colony : Option[String] , employmentStatus : Option[String]  /*extra fields from second step page*/
+                         ,user_agent : Option[String],interest_flag: Option[Boolean]= Some(false), secondSignup_flag : Option[Boolean]= Some(false), email_verification_flag : Option[Boolean]= Some(false), /*user prfile flags*/
+                         lastLogin: Long = 0, loginCount: Int = 0, sessionsStatus: List[SessionStatus] = List(), dateline: Long = System.currentTimeMillis()
+                        ) /*default value*/
 
 case class Location(city: Option[String], state:Option[String], country: Option[String], countryCode: Option[String], lat: Option[Double], lon: Option[Double], ip: Option[String], region: Option[String], regionName: Option[String], timezone: Option[String], zip: Option[String])
 
@@ -82,11 +88,12 @@ case class Consumer(username : String)
 case class GetCompanies(employer: String)*/
 
 object JsonRepo extends DefaultJsonProtocol with SprayJsonSupport {
-  implicit val loginDtoFormats: RootJsonFormat[LoginDto] = jsonFormat2(LoginDto)
-  implicit val uidDtoFormats: RootJsonFormat[UidDto] = jsonFormat1(UidDto)
   implicit val locationFormats: RootJsonFormat[Location] = jsonFormat11(Location)
+  implicit val loginDtoFormats: RootJsonFormat[LoginDto] = jsonFormat4(LoginDto)
+  implicit val uidDtoFormats: RootJsonFormat[UidDto] = jsonFormat1(UidDto)
+
   implicit val contactInfoFormats: RootJsonFormat[ContactInfo] = jsonFormat11(ContactInfo)
-  implicit val registerDtoFormats: RootJsonFormat[RegisterDto] = jsonFormat12(RegisterDto)
+  implicit val registerDtoFormats: RootJsonFormat[RegisterDto] = jsonFormat13(RegisterDto)
   implicit val errorMessageDtoFormats: RootJsonFormat[responseMessage] = jsonFormat3(responseMessage)
   implicit val registerDtoResponseDtoFormats: RootJsonFormat[RegisterDtoResponse] = jsonFormat4(RegisterDtoResponse)
   implicit val secondSignupStepsFormats: RootJsonFormat[SecondSignupStep] = jsonFormat20(SecondSignupStep)

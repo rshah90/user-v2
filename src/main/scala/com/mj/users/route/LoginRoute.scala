@@ -31,6 +31,7 @@ trait LoginRoute {
     implicit val timeout = Timeout(20, TimeUnit.SECONDS)
 
     path("api" / "loginUser") {
+      println("here")
       post {
         entity(as[LoginDto]) { dto =>
           val validatorResp = SchedulingValidator.validateLoginUserRequest(dto)

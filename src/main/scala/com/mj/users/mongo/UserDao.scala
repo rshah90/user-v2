@@ -55,7 +55,7 @@ object UserDao {
         userRequest.copy(password = sha1(userRequest.password), repassword = sha1(userRequest.password))
       }
       userData <- Future {
-        DBRegisterDto(BSONObjectID.generate().stringify, avatar, prepareUseRequest,None , None, None, None, None, None, None)
+        DBRegisterDto(BSONObjectID.generate().stringify, avatar, prepareUseRequest,None , None, None, None, None, None, None,userRequest.user_agent)
       }
       response <- insert[DBRegisterDto](usersCollection, userData).map {
         resp => RegisterDtoResponse(resp._id, resp.registerDto.firstname, resp.registerDto.lastname, resp.registerDto.email)
@@ -179,14 +179,16 @@ object UserDao {
   }
 
   //when user login, update the loginCount and online info
-  def loginUpdate(uid: String): Future[String] = {
+  def loginUpdate(uid: String, login : LoginDto): Future[String] = {
     for {
       onlineResult <- updateOnline(uid)
       loginResult <- {
         val selector = document("_id" -> uid)
-        val updateDoc = document(
+        val updateDoc =  document("$set" -> document(
+          "user_agent" -> login.user_agent,
+          "registerDto.location" -> login.location) ,
           "$inc" -> document("loginCount" -> 1)
-        )
+          )
         update(usersCollection, selector, updateDoc)
       }
     } yield {
