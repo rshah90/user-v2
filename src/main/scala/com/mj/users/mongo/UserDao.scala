@@ -196,6 +196,15 @@ object UserDao {
     }
   }
 
+  def emailVerification(memberID : String): Future[String] ={
+    update(usersCollection, {
+      BSONDocument("_id" -> memberID)
+    }, {
+      BSONDocument(
+        "$set" -> BSONDocument("email_verification_flag" -> true))
+    }).map(resp => resp)
+  }
+
   def getDefaultAvatar: Future[Map[String, String]] = {
     for {
       (idBoy, fileNameBoy, fileTypeBoy, fileSizeBoy, fileMetaDataBoy, errmsgBoy) <- getGridFileMeta(

@@ -41,6 +41,7 @@ object Server extends App {
   val JWTCredentialsCreation = system.actorOf(RoundRobinPool(20).props(Props[dispatcher.JWTCredentialsCreation]), "JWTCredentialsCreation")
   val JWTConsumerCreation = system.actorOf(RoundRobinPool(20).props(Props[dispatcher.JWTConsumerCreation]), "JWTConsumerCreation")
   val JWTConsumerRemoval = system.actorOf(RoundRobinPool(20).props(Props[dispatcher.JWTConsumerRemoval]), "JWTConsumerRemoval")
+  val emailNotificationUserProcessor = system.actorOf(RoundRobinPool(20).props(Props[processor.EmailNotificationUserProcessor]), "emailNotificationUserProcessor")
 
 
   import system.dispatcher

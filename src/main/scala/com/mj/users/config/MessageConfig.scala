@@ -11,6 +11,7 @@ trait MessageConfig {
   /* Success Mesages*/
   val loginSuccess = conf.getString("successMessages.loginSuccess")
   val logoutSuceess = conf.getString("successMessages.logoutSuceess")
+  val emailSuccess = conf.getString("successMessages.emailSuccess")
   val secondSignupSuccess = conf.getString("successMessages.secondSignupSuccess")
   val updateInterestSuccess = conf.getString("successMessages.updateInterestSuccess")
 
