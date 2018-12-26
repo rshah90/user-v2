@@ -61,7 +61,7 @@ object UserDao {
         DBRegisterDto(BSONObjectID.generate().stringify, avatar, prepareUseRequest,None , None, None, None, None, None, None)
       }
       response <- insert[DBRegisterDto](usersCollection, userData).map {
-        resp => RegisterDtoResponse(resp._id, resp.registerDto.firstname, resp.registerDto.lastname, resp.registerDto.email)
+        resp => RegisterDtoResponse(resp._id, resp.registerDto.firstname, resp.registerDto.lastname, resp.registerDto.email ,resp.avatar)
       }
 
       

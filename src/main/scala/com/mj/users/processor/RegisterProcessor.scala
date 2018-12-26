@@ -33,7 +33,7 @@ class RegisterProcessor extends Actor with MessageConfig{
           }
         ).map(response =>{
         insertLoginHistory(response.memberID,resgisterDto.user_agent,resgisterDto.location)
-      val script = s"CREATE (s:users {memberID:'${response.memberID}', firstname:'${ response.firstname }', lastname:'${ response.lastname }', email:'${ resgisterDto.email }', password:'${resgisterDto.password}', signupdate: TIMESTAMP()}) "
+      val script = s"CREATE (s:users {memberID:'${response.memberID}', firstname:'${ response.firstname }', lastname:'${ response.lastname }', email:'${ resgisterDto.email }', password:'${resgisterDto.password}' , avatar:'${response.avatar}', signupdate: TIMESTAMP()}) "
 
       connectNeo4j(script).map(resp => resp match {
         case count if count > 0 => origin ! response
