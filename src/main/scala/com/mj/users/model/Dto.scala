@@ -19,7 +19,7 @@ case class RegisterDto(email: String, nickname: String, password: String, repass
                        friends_with_post:Option[List[String]],
                        user_agent : Option[String])
 
-case class loginHistory(memberId : String ,user_agent : Option[String],location:Option[Location])
+case class loginHistory(memberID : String ,user_agent : Option[String],location:Option[Location])
 //RegisterDto api user response
 case class RegisterDtoResponse(memberID: String, firstname: String, lastname: String, email: String ,  avatar: String)
 
