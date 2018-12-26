@@ -19,6 +19,7 @@ case class RegisterDto(email: String, nickname: String, password: String, repass
                        friends_with_post:Option[List[String]],
                        user_agent : Option[String])
 
+case class loginHistory(memberId : String ,user_agent : Option[String],location:Option[Location])
 //RegisterDto api user response
 case class RegisterDtoResponse(memberID: String, firstname: String, lastname: String, email: String)
 
@@ -29,7 +30,7 @@ case class DBRegisterDto(var _id : String , avatar: String,
                          education: Option[userEducation] , /*education collection*/
                          Interest : Option[List[String]] ,   /*interest details*/
                          userIP : Option[String] ,country : Option[String] ,interest_on_colony : Option[String] , employmentStatus : Option[String]  /*extra fields from second step page*/
-                         ,user_agent : Option[String],interest_flag: Option[Boolean]= Some(false), secondSignup_flag : Option[Boolean]= Some(false), email_verification_flag : Option[Boolean]= Some(false), /*user prfile flags*/
+                         ,interest_flag: Option[Boolean]= Some(false), secondSignup_flag : Option[Boolean]= Some(false), email_verification_flag : Option[Boolean]= Some(false), /*user prfile flags*/
                          lastLogin: Long = 0, loginCount: Int = 0, sessionsStatus: List[SessionStatus] = List(), dateline: Long = System.currentTimeMillis()
                         ) /*default value*/
 

@@ -31,6 +31,7 @@ class LoginProcessor extends Actor with MessageConfig{
         .flatMap(user => Future {
           user.filter(_.registerDto.password == sha1(loginDto.password)).map(_._id).map(uid => {
             loginUpdate(uid,loginDto)
+            insertLoginHistory(uid,loginDto.user_agent,loginDto.location)
             uid
           })
         }).flatMap(uid =>

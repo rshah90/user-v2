@@ -23,6 +23,11 @@ object Application {
   val kongAdminURL = config.getString("kong.admin.url")
   val kongExpirationTime = config.getInt("kong.expiration.time")
 
+  //neo4j config
+  val neo4jUrl = config.getString("neo4j.url")
+  val neo4jUsername = config.getString("neo4j.username")
+  var neo4jPassword = config.getString("neo4j.password")
+
   //Mongo configuration
   val dbName = configMongoDbname
   val database_profile = configProfileDbName

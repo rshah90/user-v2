@@ -18,6 +18,7 @@ object UserDao {
   val onlinesCollection: Future[BSONCollection] = db.map(_.collection[BSONCollection]("onlines"))
   val experienceCollection: Future[BSONCollection] = db1.map(_.collection[BSONCollection]("experience"))
   val eductionCollection: Future[BSONCollection] = db1.map(_.collection[BSONCollection]("education"))
+  val loginHistoryCollection: Future[BSONCollection] = db.map(_.collection[BSONCollection]("loginHistory"))
 
   implicit def sessionStatusHandler = Macros.handler[SessionStatus]
 
@@ -39,6 +40,8 @@ object UserDao {
 
   implicit def dbRegisterHandler = Macros.handler[DBRegisterDto]
 
+  implicit def loginHistoryRegisterHandler = Macros.handler[loginHistory]
+
   val defaultAvatar = getDefaultAvatar
 
   //insert user Details
@@ -55,11 +58,13 @@ object UserDao {
         userRequest.copy(password = sha1(userRequest.password), repassword = sha1(userRequest.password))
       }
       userData <- Future {
-        DBRegisterDto(BSONObjectID.generate().stringify, avatar, prepareUseRequest,None , None, None, None, None, None, None,userRequest.user_agent)
+        DBRegisterDto(BSONObjectID.generate().stringify, avatar, prepareUseRequest,None , None, None, None, None, None, None)
       }
       response <- insert[DBRegisterDto](usersCollection, userData).map {
         resp => RegisterDtoResponse(resp._id, resp.registerDto.firstname, resp.registerDto.lastname, resp.registerDto.email)
       }
+
+      
     }
       yield (response)
   }
@@ -105,6 +110,18 @@ object UserDao {
 
   }
 
+  def insertLoginHistory(memberId : String , user_Agent : Option[String] , location : Option[Location]) = {
+    for {
+
+      userData <- Future {
+        loginHistory(memberId ,user_Agent,location)
+      }
+      response <- insert[loginHistory](loginHistoryCollection, userData)
+
+
+    }
+      yield (response)
+  }
 
   def insertExperienceDetails(secondStepRequest: SecondSignupStep) = {
     if (secondStepRequest.employmentStatus.toInt > 5) {

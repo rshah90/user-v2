@@ -6,6 +6,7 @@ import akka.actor.Actor
 import akka.util.Timeout
 import com.mj.users.config.MessageConfig
 import com.mj.users.model.{RegisterDto, responseMessage}
+import com.mj.users.mongo.Neo4jConnector.connectNeo4j
 import com.mj.users.mongo.UserDao._
 import org.slf4j.LoggerFactory
 
@@ -27,12 +28,21 @@ class RegisterProcessor extends Actor with MessageConfig{
               throw new Exception(userExistMsg)
             }
             case None => {
-              insertUserDetails(resgisterDto)
+               insertUserDetails(resgisterDto)
             }
           }
-        ).map(response =>
-        origin ! response
-      )
+        ).map(response =>{
+        insertLoginHistory(response.memberID,resgisterDto.user_agent,resgisterDto.location)
+      val script = s"CREATE (s:users {memberID:'${response.memberID}', firstname:'${ response.firstname }', lastname:'${ response.lastname }', email:'${ resgisterDto.email }', password:'${resgisterDto.password}', signupdate: TIMESTAMP()}) "
+
+      connectNeo4j(script).map(resp => resp match {
+        case count if count > 0 => origin ! response
+        case 0 => origin ! responseMessage("", s"insert record email : ${response.firstname}", "")
+      })
+      })
+
+
+
 
       result.recover {
         case e: Throwable => {
